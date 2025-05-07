@@ -2,448 +2,67 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>게임</title>
+  <title>추천 문제집</title>
   <style>
-    /* 업데이트된 CSS 코드 */
     body {
-      font-family: Arial, sans-serif;
+      font-family: sans-serif;
+      background-color: #fdf6e3;
       text-align: center;
-      margin: 0;
+      padding: 50px;
+    }
+
+    button {
+      padding: 12px 24px;
+      font-size: 16px;
+      background-color: #f5deb3;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #f3d999;
+    }
+
+    ul {
+      margin-top: 30px;
+      list-style-type: none;
       padding: 0;
     }
 
-    #gameCanvas {
-      position: relative;
-      width: 600px;
-      height: 400px;
-      border: 2px solid black;
-      margin: 20px auto;
+    li {
+      margin: 10px 0;
     }
 
-    .button-circle {
-      position: absolute;
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      line-height: 100px;
-      color: white;
-      font-size: 20px;
-      cursor: pointer;
-      text-align: center;
+    a {
+      color: #2a2a2a;
+      text-decoration: none;
+      font-weight: bold;
     }
 
-    #goButton {
-      background-color: green;
-      top: 150px;
-    }
-
-    #stopButton {
-      background-color: red;
-      top: 150px;
-    }
-
-    #successLabel {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      font-size: 18px;
-    }
-
-    #timerLabel {
-      position: absolute;
-      bottom: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 18px;
-    }
-
-    #failMessage,
-    #failPercentageMessage,
-    #successMessage,
-    #congratsMessage,
-    #alternatingMessage,
-    #confirmButton,
-    #startButton,
-    #successConfirmButton {
-      display: none;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 40px;
-    }
-
-    #failMessage {
-      color: red;
-    }
-
-    #failPercentageMessage {
-      position: absolute;
-      top: calc(50% + 30px);
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 20px;
-      color: black;
-    }
-
-    #successMessage {
-      color: green;
-    }
-
-    #congratsMessage {
-      color: gold;
-      top: 40%;
-    }
-
-    #alternatingMessage {
-      font-size: 40px;
-    }
-
-    #confirmButton,
-    #startButton,
-    #successConfirmButton {
-      font-size: 20px;
-      padding: 10px 20px;
-      cursor: pointer;
-    }
-
-    #confirmButton {
-      position: absolute;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-    }
-
-    #successConfirmButton {
-      position: absolute;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-    }
-
-    #successCount {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      font-size: 18px;
-      max-width: 180px;
-      text-align: right;
-      white-space: normal;
-      word-wrap: break-word;
-      display: block;
-    }
-
-    /* 추가된 CSS */
-    #startCountLabel {
-      position: absolute;
-      top: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 18px;
+    a:hover {
+      text-decoration: underline;
     }
   </style>
 </head>
 <body>
-  <div id="gameCanvas">
-    <div id="goButton" class="button-circle">GO</div>
-    <div id="stopButton" class="button-circle">STOP</div>
-    <div id="successLabel">Success: 0</div>
-    <div id="timerLabel">Time: 10</div>
-    <div id="failMessage">FAIL</div>
-    <div id="failPercentageMessage"></div>
-    <div id="successMessage">SUCCESS</div>
-    <div id="congratsMessage">축하합니다!</div>
-    <div id="alternatingMessage"></div>
-    <div id="confirmButton">확인</div>
-    <div id="successConfirmButton">확인</div>
-    <div id="startButton">시작</div>
-    <div id="successCount">0번째 성공</div>
-    <div id="startCountLabel"></div> <!-- 추가된 부분 -->
-  </div>
+
+  <h1>📚 추천 문제집 리스트</h1>
+  <button onclick="showBooks()">추천 문제집 보기</button>
+
+  <ul id="bookList" style="display: none;">
+    <li><a href="https://www.dcinside.com/" target="_blank">문제집 1 - 수학 실전편</a></li>
+    <li><a href="https://www.dcinside.com/" target="_blank">문제집 2 - 영어 독해 마스터</a></li>
+    <li><a href="https://www.dcinside.com/" target="_blank">문제집 3 - 국어 비문학 완성</a></li>
+    <li><a href="https://www.dcinside.com/" target="_blank">문제집 4 - 과학 개념 총정리</a></li>
+    <li><a href="https://www.dcinside.com/" target="_blank">문제집 5 - 한국사 실력 향상</a></li>
+  </ul>
 
   <script>
-    // 업데이트된 JavaScript 코드
-    let successCount = 0;
-    let successStreak = 0; // n번째 성공 추적
-    let timeLeft = 10;
-    let timer;
-
-    let startButtonPressCount = 0; // 시작 버튼 누른 횟수
-    let stopButtonPressCount = 0; // STOP 버튼 누른 횟수
-    let failScreenCount = 0; // FAIL 화면이 나타난 횟수
-
-    const goButton = document.getElementById('goButton');
-    const stopButton = document.getElementById('stopButton');
-    const successLabel = document.getElementById('successLabel');
-    const timerLabel = document.getElementById('timerLabel');
-    const failMessage = document.getElementById('failMessage');
-    const failPercentageMessage = document.getElementById('failPercentageMessage'); // 추가된 부분
-    const successMessage = document.getElementById('successMessage');
-    const congratsMessage = document.getElementById('congratsMessage');
-    const confirmButton = document.getElementById('confirmButton');
-    const startButton = document.getElementById('startButton');
-    const successConfirmButton = document.getElementById('successConfirmButton');
-    const alternatingMessage = document.getElementById('alternatingMessage');
-    const successCountLabel = document.getElementById('successCount');
-    const startCountLabel = document.getElementById('startCountLabel'); // 추가된 부분
-
-    function startCountdown() {
-      timeLeft = 10;
-      timerLabel.textContent = `Time: ${timeLeft}`;
-      timer = setInterval(() => {
-        if (timeLeft > 0) {
-          timeLeft--;
-          timerLabel.textContent = `Time: ${timeLeft}`;
-        } else {
-          clearInterval(timer);
-          showFailScreen();
-        }
-      }, 1000);
+    function showBooks() {
+      document.getElementById('bookList').style.display = 'block';
     }
-
-    function updateSuccessCount() {
-      successLabel.textContent = `Success: ${successCount}`;
-    }
-
-    function updateSuccessStreak() {
-      // 각 성공 횟수에 따른 메시지 정의
-      const messages = {
-        0: '없음', // 없음
-        1: '후르츠텔라 1개',
-        2: '후르츠텔라 2개',
-        3: '초코파이 1개',
-        4: '바나나킥 1개',
-        5: '바나나킥 1개 초코파이 1개 후르츠텔라 3개 맥라렌까지 4번 남음',
-        6: '바나나킥 1개 초코파이 1개 후르츠텔라 3개 맥라렌까지 3번 남음',
-        7: '바나나킥 1개 초코파이 1개 후르츠텔라 3개 맥라렌까지 2번 남음',
-        8: '바나나킥 1개 초코파이 1개 후르츠텔라 3개 다음 맥라렌',
-        9: '맥라랜 600LT'
-      };
-
-      // 현재 성공 횟수에 따른 메시지 가져오기
-      let message = messages[successStreak];
-
-      // 성공 횟수가 9보다 크면 9로 고정
-      if (successStreak > 9) {
-        message = messages[9];
-      }
-
-      // 문구 업데이트
-      successCountLabel.textContent = message;
-
-      // 글자 크기 유지
-      successCountLabel.style.fontSize = '18px';
-
-      // 글자가 화면 밖으로 나가지 않도록 처리
-      successCountLabel.style.whiteSpace = 'normal';
-      successCountLabel.style.wordWrap = 'break-word';
-
-      // 항상 표시되도록 설정
-      successCountLabel.style.display = 'block';
-    }
-
-    function resetGame() {
-      timeLeft = 10;
-      timerLabel.textContent = `Time: ${timeLeft}`;
-      failMessage.style.display = 'none';
-      failPercentageMessage.style.display = 'none'; // 퍼센트 메시지 숨기기
-      successMessage.style.display = 'none';
-      congratsMessage.style.display = 'none';
-      confirmButton.style.display = 'none';
-      successConfirmButton.style.display = 'none';
-      startButton.style.display = 'none';
-      alternatingMessage.style.display = 'none';
-      startCountLabel.style.display = 'none'; // 추가된 부분
-
-      // 아이템 메시지 업데이트
-      updateSuccessStreak();
-
-      // 성공 스택에 따라 버튼의 표시 여부와 위치를 조정
-      if (successStreak === 0) {
-        goButton.style.display = 'block';
-        stopButton.style.display = 'none';
-
-        // GO 버튼 가운데로 이동
-        goButton.style.left = '50%';
-        goButton.style.transform = 'translateX(-50%)';
-
-      } else if (successStreak === 9) {
-        goButton.style.display = 'none';
-        stopButton.style.display = 'block';
-
-        // STOP 버튼 가운데로 이동
-        stopButton.style.left = '50%';
-        stopButton.style.transform = 'translateX(-50%)';
-
-      } else {
-        goButton.style.display = 'block';
-        stopButton.style.display = 'block';
-
-        // GO 버튼 위치 설정 (중심에서 왼쪽으로)
-        goButton.style.left = 'calc(50% - 100px)';
-        goButton.style.transform = 'translateX(-50%)';
-
-        // STOP 버튼 위치 설정 (중심에서 오른쪽으로)
-        stopButton.style.left = 'calc(50% + 100px)';
-        stopButton.style.transform = 'translateX(-50%)';
-      }
-
-      startCountdown();
-    }
-
-    function showFailScreen() {
-      goButton.style.display = 'none';
-      stopButton.style.display = 'none';
-      failMessage.style.display = 'block';
-      failPercentageMessage.style.display = 'block'; // 퍼센트 메시지 표시
-      startCountLabel.style.display = 'block'; // 추가된 부분
-      startCountLabel.textContent = `시작 버튼 누른 횟수: ${startButtonPressCount}`; // 추가된 부분
-
-      failScreenCount++; // FAIL 화면 횟수 증가
-
-      // n 값 계산
-      let n;
-      if (startButtonPressCount === 0) {
-        n = 0; // 시작 버튼을 한 번도 누르지 않았을 경우 0%
-      } else {
-        n = (failScreenCount / startButtonPressCount) * 100;
-        n = Math.round(n); // 소수점 제거
-      }
-
-      // failPercentageMessage에 색상 적용하여 메시지 설정
-      failPercentageMessage.innerHTML = `당신은 실패한 <span style="color: blue;">${n}%</span>입니다`;
-
-      clearInterval(timer);
-      successStreak = 0; // FAIL이 떴을 때 성공 스택 초기화
-      updateSuccessStreak(); // 아이템 메시지 업데이트
-
-      // 5초 후에 FAIL 메시지를 숨기고 시작 버튼 표시
-      setTimeout(() => {
-        failMessage.style.display = 'none'; // FAIL 메시지 숨기기
-        failPercentageMessage.style.display = 'none'; // 퍼센트 메시지 숨기기
-        startCountLabel.style.display = 'none'; // 추가된 부분
-        startButton.style.display = 'block'; // 시작 버튼 표시
-      }, 5000); // 5초 후에 실행
-    }
-
-    function showSuccessScreen() {
-      goButton.style.display = 'none';
-      stopButton.style.display = 'none';
-      successMessage.style.display = 'block';
-      successConfirmButton.style.display = 'block'; // 확인 버튼 표시
-      successCount++;
-      successStreak++; // 성공 스택 증가
-      updateSuccessCount();
-
-      // 성공 스택이 9을 초과하지 않도록 제한
-      if (successStreak > 9) {
-        successStreak = 9;
-      }
-
-      updateSuccessStreak(); // 아이템 메시지 업데이트
-      clearInterval(timer);
-    }
-
-    function showCongratsScreen() {
-      goButton.style.display = 'none';
-      stopButton.style.display = 'none';
-      congratsMessage.style.display = 'block';
-      confirmButton.style.display = 'block';
-      clearInterval(timer);
-      // successStreak = 0; // 제거된 부분
-      // updateSuccessStreak(); // 제거된 부분
-    }
-
-    function goToStartScreen() {
-      congratsMessage.style.display = 'none';
-      confirmButton.style.display = 'none';
-      failMessage.style.display = 'none';
-      failPercentageMessage.style.display = 'none'; // 퍼센트 메시지 숨기기
-      startButton.style.display = 'block';
-      successStreak = 0; // 축하 화면에서 성공 스택 초기화
-      updateSuccessStreak(); // 아이템 메시지 업데이트
-    }
-
-    function goToGameScreen() {
-      startButton.style.display = 'none';
-      failMessage.style.display = 'none'; // 실패 메시지 숨기기
-      failPercentageMessage.style.display = 'none'; // 퍼센트 메시지 숨기기
-      startCountLabel.style.display = 'none'; // 추가된 부분
-      resetGame();
-    }
-
-    function alternateFailSuccess() {
-      let count = 0;
-      let intervalTime = 250; // 처음 1초당 4번 (0.25초 간격)
-      let startTime = Date.now();
-      alternatingMessage.style.display = 'block';
-
-      function blink() {
-        let now = Date.now();
-        let elapsedTime = now - startTime;
-
-        // 색상 및 텍스트 변경
-        if (alternatingMessage.textContent === 'SUCCESS') {
-          alternatingMessage.textContent = 'FAIL';
-          alternatingMessage.style.color = 'red';
-        } else {
-          alternatingMessage.textContent = 'SUCCESS';
-          alternatingMessage.style.color = 'green';
-        }
-
-        // 5초 후에는 멈추고 결과 화면 표시
-        if (elapsedTime >= 5000) {
-          alternatingMessage.style.display = 'none';
-          const randomOutcome = Math.random();
-          if (randomOutcome < 0.58) { // SUCCESS 확률 58%
-            showSuccessScreen();
-          } else {
-            showFailScreen();
-          }
-        } else {
-          // 0.2초마다 깜빡거리는 속도가 3배씩 증가
-          if (elapsedTime >= count * 200) {
-            intervalTime /= 3;
-            count++;
-          }
-          setTimeout(blink, intervalTime); // 다음 깜빡거림 예약
-        }
-      }
-
-      blink(); // 깜빡거림 시작
-    }
-
-    function handleGoButtonClick() {
-      goButton.style.display = 'none';
-      stopButton.style.display = 'none';
-      clearInterval(timer);
-      alternateFailSuccess();
-    }
-
-    goButton.addEventListener('click', () => {
-      handleGoButtonClick();
-    });
-
-    stopButton.addEventListener('click', () => {
-      stopButtonPressCount++;
-      showCongratsScreen(); // 축하 화면 표시
-    });
-
-    confirmButton.addEventListener('click', () => {
-      goToStartScreen(); // 확인 버튼을 누르면 시작 화면으로 이동
-    });
-
-    successConfirmButton.addEventListener('click', () => {
-      resetGame(); // SUCCESS 확인 버튼을 누르면 게임 화면으로 이동
-    });
-
-    startButton.addEventListener('click', () => {
-      startButtonPressCount++;
-      goToGameScreen(); // 시작 버튼을 누르면 게임 화면으로 이동
-    });
-
-    // 페이지 로드 시 카운트다운 시작
-    startCountdown();
   </script>
+
 </body>
 </html>
